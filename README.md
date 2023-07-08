@@ -30,5 +30,6 @@ speed test is performed on a single Nvidia GeForce RTX 3050 GPU
 ````bash
 python tools/demo.py --model ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_trt.ts --input ./path/to/sample/video
 ````
-
+### Acknowledgement
+1. [PIDNet](https://github.com/XuJiacong/PIDNet/tree/main)
 
