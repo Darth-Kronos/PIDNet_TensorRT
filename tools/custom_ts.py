@@ -39,9 +39,7 @@ color_map = [(128, 64,128),
 def parse_args():
     parser = argparse.ArgumentParser(description='Custom Input')
     
-    parser.add_argument('--a', help='pidnet-s, pidnet-m or pidnet-l', default='pidnet-s', type=str)
-    parser.add_argument('--c', help='cityscapes pretrained or not', type=bool, default=True)
-    parser.add_argument('--p', help='dir for pretrained model', default='../pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt', type=str)
+    parser.add_argument('--p', help='dir for pretrained model', default='../pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_ts.pt', type=str)
     parser.add_argument('--r', help='root or dir for input images', default='../samples/', type=str)
     parser.add_argument('--t', help='the format of input images (.jpg, .png, ...)', default='.png', type=str)     
 
@@ -74,12 +72,11 @@ def load_pretrained(model, pretrained):
 if __name__ == '__main__':
     args = parse_args()
     images_list = glob.glob(args.r+'*'+args.t)
-    sv_path = args.r+'outputs/'
+    sv_path = args.r+'outputs_ts/'
     
-    model = models.pidnet.get_pred_model(args.a, 19 if args.c else 11)
-    model = load_pretrained(model, args.p).cuda()
-    model.eval()
-    
+    # model = models.pidnet.get_pred_model(args.a, 19 if args.c else 11)
+    # model = load_pretrained(model, args.p).cuda()
+    model = torch.jit.load(args.p).cuda()    
     ################################# warm up!!
     torch.cuda.nvtx.range_push("model warm up")
     for i in range(5):

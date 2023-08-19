@@ -264,7 +264,6 @@ class PAPPM(nn.Module):
         out = self.compression(torch.cat([x_,scale_out], 1)) + self.shortcut(x)
         return out
     
-
 class PagFM(nn.Module):
     def __init__(self, in_channels, mid_channels, after_relu=False, with_channel=False, BatchNorm=nn.BatchNorm2d):
         super(PagFM, self).__init__()

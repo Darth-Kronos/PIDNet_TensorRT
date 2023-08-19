@@ -134,13 +134,18 @@ class PIDNet(nn.Module):
         return layer
 
     def forward(self, x):
-
-        width_output = x.shape[-1] // 8
-        height_output = x.shape[-2] // 8
-
+        torch.cuda.nvtx.range_push("stage1")
+        # width_output = x.shape[-1] // 8
+        # height_output = x.shape[-2] // 8
+        # print("width and height: ", width_output, height_output)
+        width_output = 256
+        height_output = 128
         x = self.conv1(x)
         x = self.layer1(x)
         x = self.relu(self.layer2(self.relu(x)))
+        torch.cuda.nvtx.range_pop()
+
+        torch.cuda.nvtx.range_push("stage2")
         x_ = self.layer3_(x)
         x_d = self.layer3_d(x)
         
@@ -150,6 +155,9 @@ class PIDNet(nn.Module):
                         self.diff3(x),
                         size=[height_output, width_output],
                         mode='bilinear', align_corners=algc)
+        torch.cuda.nvtx.range_pop()
+
+        torch.cuda.nvtx.range_push("stage3")
         if self.augment:
             temp_p = x_
         
@@ -162,18 +170,24 @@ class PIDNet(nn.Module):
                         self.diff4(x),
                         size=[height_output, width_output],
                         mode='bilinear', align_corners=algc)
+        torch.cuda.nvtx.range_pop()
+
+        torch.cuda.nvtx.range_push("stage4")
         if self.augment:
             temp_d = x_d
             
         x_ = self.layer5_(self.relu(x_))
         x_d = self.layer5_d(self.relu(x_d))
+        torch.cuda.nvtx.range_pop()
+
+        torch.cuda.nvtx.range_push("stage5")
         x = F.interpolate(
                         self.spp(self.layer5(x)),
                         size=[height_output, width_output],
                         mode='bilinear', align_corners=algc)
 
         x_ = self.final_layer(self.dfm(x_, x, x_d))
-
+        torch.cuda.nvtx.range_pop()
         if self.augment: 
             x_extra_p = self.seghead_p(temp_p)
             x_extra_d = self.seghead_d(temp_d)

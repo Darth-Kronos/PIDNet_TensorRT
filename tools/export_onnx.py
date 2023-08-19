@@ -15,8 +15,8 @@ def parse_args():
     
     parser.add_argument('--a', help='pidnet-s, pidnet-m or pidnet-l', default='pidnet-s', type=str)
     parser.add_argument('--c', help='cityscapes pretrained or not', type=bool, default=True)
-    parser.add_argument('--p', help='pretrained model path', default='./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt', type=str)
-    parser.add_argument('--o', help='output file path', default='./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_traced.ts', type=str)
+    parser.add_argument('--p', help='pretrained model path', default='../pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt', type=str)
+    parser.add_argument('--o', help='output file path', default='../pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_onnx.onnx', type=str)
     args = parser.parse_args()
     return args
 
@@ -41,10 +41,8 @@ if __name__ == '__main__':
     model = models.pidnet.get_pred_model(args.a, 19 if args.c else 11)
     model = load_pretrained(model, args.p).cuda().eval()
     input = torch.randn(1, 3, 1024, 2048).cuda()
-    module = torch.jit.trace(model, input)
-    # module = torch.jit.script(model)
-    print("done tracing!")
-    torch.jit.save(module, args.o)
+    torch.onnx.export(model, input, args.o, verbose=False,input_names=["input"],
+                      output_names=["output"])
     # trt_model_fp32 = torch_tensorrt.compile(module, inputs=[input], enabled_precisions = torch.float32, workspace_size = 1 << 22)
     # trt_model_fp32 = torch_tensorrt.compile(module, inputs=[torch_tensorrt.Input((1, 3, 1024, 2048))],
     #                                         enabled_precisions = torch.float32, workspace_size = 1 << 22,
