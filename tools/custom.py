@@ -39,9 +39,9 @@ color_map = [(128, 64,128),
 def parse_args():
     parser = argparse.ArgumentParser(description='Custom Input')
     
-    parser.add_argument('--a', help='pidnet-s, pidnet-m or pidnet-l', default='pidnet-s', type=str)
+    parser.add_argument('--a', help='pidnet-s, pidnet-m or pidnet-l', default='pidnet-l', type=str)
     parser.add_argument('--c', help='cityscapes pretrained or not', type=bool, default=True)
-    parser.add_argument('--p', help='dir for pretrained model', default='../pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt', type=str)
+    parser.add_argument('--p', help='dir for pretrained model', default='../pretrained_models/cityscapes/PIDNet_L_Cityscapes_test.pt', type=str)
     parser.add_argument('--r', help='root or dir for input images', default='../samples/', type=str)
     parser.add_argument('--t', help='the format of input images (.jpg, .png, ...)', default='.png', type=str)     
 
@@ -79,33 +79,16 @@ if __name__ == '__main__':
     model = models.pidnet.get_pred_model(args.a, 19 if args.c else 11)
     model = load_pretrained(model, args.p).cuda()
     model.eval()
-    
-    ################################# warm up!!
-    torch.cuda.nvtx.range_push("model warm up")
-    for i in range(5):
-        dummy_pred = model(torch.zeros(1,3,1024,2048).cuda())
-    torch.cuda.nvtx.range_pop()
-
     with torch.no_grad():
         for img_path in images_list:
-            # print("img_path: ", img_path)
-            img_name = img_path.split("/")[-1]
+            img_name = img_path.split("\\")[-1]
             img = cv2.imread(os.path.join(args.r, img_name),
                                cv2.IMREAD_COLOR)
             sv_img = np.zeros_like(img).astype(np.uint8)
-
-            torch.cuda.nvtx.range_push("pre-processing")
             img = input_transform(img)
             img = img.transpose((2, 0, 1)).copy()
             img = torch.from_numpy(img).unsqueeze(0).cuda()
-            # print("img shape: ", img.size())
-            torch.cuda.nvtx.range_pop()
-
-            torch.cuda.nvtx.range_push("inference")
             pred = model(img)
-            torch.cuda.nvtx.range_pop()
-
-            torch.cuda.nvtx.range_push("post-processing")
             pred = F.interpolate(pred, size=img.size()[-2:], 
                                  mode='bilinear', align_corners=True)
             pred = torch.argmax(pred, dim=1).squeeze(0).cpu().numpy()
@@ -114,11 +97,9 @@ if __name__ == '__main__':
                 for j in range(3):
                     sv_img[:,:,j][pred==i] = color_map[i][j]
             sv_img = Image.fromarray(sv_img)
-            torch.cuda.nvtx.range_pop()
-
+            
             if not os.path.exists(sv_path):
                 os.mkdir(sv_path)
-            print("save path: ", sv_path, img_name)
             sv_img.save(sv_path+img_name)
             
             
