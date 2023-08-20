@@ -1,6 +1,4 @@
-# ------------------------------------------------------------------------------
-# Written by Jiacong Xu (jiacong.xu@tamu.edu)
-# ------------------------------------------------------------------------------
+import numpy as np
 import argparse
 import torch
 import torch.nn as nn
@@ -8,6 +6,10 @@ import torch.nn.functional as F
 import time
 from model_utils_speed import BasicBlock, Bottleneck, segmenthead, DAPPM, PAPPM, PagFM, Bag, Light_Bag
 import logging
+
+import onnx
+import onnxruntime as ort
+
 BatchNorm2d = nn.BatchNorm2d
 
 bn_mom = 0.1
@@ -234,12 +236,19 @@ if __name__ == '__main__':
     #model.eval()
     #model.to(device)
     iterations = None
-    model = torch.jit.load('./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_traced.ts')
+    image_ortvalue = ort.OrtValue.ortvalue_from_numpy(np.zeros((1,3,1024,2048)), 'cuda', 0)
+    # image_ortvalue = ort.OrtValue.ortvalue_from_numpy(np.zeros((1,3,1024,2048)))
+    session = ort.InferenceSession('./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_onnx.onnx', providers=['TensorrtExecutionProvider','CUDAExecutionProvider', 'CPUExecutionProvider'])
+    io_binding = session.io_binding()
+    io_binding.bind_input(name='input', device_type=image_ortvalue.device_name(),
+                          device_id=0, element_type=np.float32,
+                          shape=image_ortvalue.shape(), buffer_ptr=image_ortvalue.data_ptr())
+    io_binding.bind_output('output')
     
     input = torch.randn(1, 3, args.r[0], args.r[1]).cuda()
     with torch.no_grad():
         for _ in range(10):
-            model(input)
+            session.run_with_iobinding(io_binding)
     
         if iterations is None:
             elapsed_time = 0
@@ -249,7 +258,7 @@ if __name__ == '__main__':
                 torch.cuda.synchronize()
                 t_start = time.time()
                 for _ in range(iterations):
-                    model(input)
+                    session.run_with_iobinding(io_binding)
                 torch.cuda.synchronize()
                 torch.cuda.synchronize()
                 elapsed_time = time.time() - t_start
@@ -262,7 +271,7 @@ if __name__ == '__main__':
         torch.cuda.synchronize()
         t_start = time.time()
         for _ in range(iterations):
-            model(input)
+            session.run_with_iobinding(io_binding)
         torch.cuda.synchronize()
         torch.cuda.synchronize()
         elapsed_time = time.time() - t_start

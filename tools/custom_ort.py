@@ -84,7 +84,7 @@ if __name__ == '__main__':
     print("before warmup")
     image_ortvalue = ort.OrtValue.ortvalue_from_numpy(np.zeros((1,3,1024,2048)), 'cuda', 0)
     # image_ortvalue = ort.OrtValue.ortvalue_from_numpy(np.zeros((1,3,1024,2048)))
-    session = ort.InferenceSession(args.p, providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+    session = ort.InferenceSession(args.p, providers=['TensorrtExecutionProvider','CUDAExecutionProvider', 'CPUExecutionProvider'])
     io_binding = session.io_binding()
     io_binding.bind_input(name='input', device_type=image_ortvalue.device_name(),
                           device_id=0, element_type=np.float32,
