@@ -29,11 +29,11 @@ class BasicBlock(nn.Module):
         residual = x
 
         out = self.conv1(x)
-        # out = self.bn1(out)
+        out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
-        # out = self.bn2(out)
+        out = self.bn2(out)
 
         if self.downsample is not None:
             residual = self.downsample(x)
@@ -67,15 +67,15 @@ class Bottleneck(nn.Module):
         residual = x
 
         out = self.conv1(x)
-        # out = self.bn1(out)
+        out = self.bn1(out)
         out = self.relu(out)
 
         out = self.conv2(out)
-        # out = self.bn2(out)
+        out = self.bn2(out)
         out = self.relu(out)
 
         out = self.conv3(out)
-        # out = self.bn3(out)
+        out = self.bn3(out)
 
         if self.downsample is not None:
             residual = self.downsample(x)
@@ -99,10 +99,10 @@ class segmenthead(nn.Module):
 
     def forward(self, x):
         
-        x = self.conv1(self.relu(x))
-        # x = self.conv1(self.relu(self.bn1(x)))
-        out = self.conv2(self.relu(x))
-        # out = self.conv2(self.relu(self.bn2(x)))
+        # x = self.conv1(self.relu(x))
+        x = self.conv1(self.relu(self.bn1(x)))
+        # out = self.conv2(self.relu(x))
+        out = self.conv2(self.relu(self.bn2(x)))
 
         if self.scale_factor is not None:
             height = x.shape[-2] * self.scale_factor

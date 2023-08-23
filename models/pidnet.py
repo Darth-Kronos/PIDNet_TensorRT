@@ -23,10 +23,10 @@ class PIDNet(nn.Module):
         # I Branch
         self.conv1 =  nn.Sequential(
                           nn.Conv2d(3,planes,kernel_size=3, stride=2, padding=1),
-                        #   BatchNorm2d(planes, momentum=bn_mom),
+                          BatchNorm2d(planes, momentum=bn_mom),
                           nn.ReLU(inplace=True),
                           nn.Conv2d(planes,planes,kernel_size=3, stride=2, padding=1),
-                        #   BatchNorm2d(planes, momentum=bn_mom),
+                          BatchNorm2d(planes, momentum=bn_mom),
                           nn.ReLU(inplace=True),
                       )
 
@@ -40,12 +40,12 @@ class PIDNet(nn.Module):
         # P Branch
         self.compression3 = nn.Sequential(
                                           nn.Conv2d(planes * 4, planes * 2, kernel_size=1, bias=False),
-                                        #   BatchNorm2d(planes * 2, momentum=bn_mom),
+                                          BatchNorm2d(planes * 2, momentum=bn_mom),
                                           )
 
         self.compression4 = nn.Sequential(
                                           nn.Conv2d(planes * 8, planes * 2, kernel_size=1, bias=False),
-                                        #   BatchNorm2d(planes * 2, momentum=bn_mom),
+                                          BatchNorm2d(planes * 2, momentum=bn_mom),
                                           )
         self.pag3 = PagFM(planes * 2, planes)
         self.pag4 = PagFM(planes * 2, planes)
@@ -60,11 +60,11 @@ class PIDNet(nn.Module):
             self.layer4_d = self._make_layer(Bottleneck, planes, planes, 1)
             self.diff3 = nn.Sequential(
                                         nn.Conv2d(planes * 4, planes, kernel_size=3, padding=1, bias=False),
-                                        # BatchNorm2d(planes, momentum=bn_mom),
+                                        BatchNorm2d(planes, momentum=bn_mom),
                                         )
             self.diff4 = nn.Sequential(
                                      nn.Conv2d(planes * 8, planes * 2, kernel_size=3, padding=1, bias=False),
-                                    #  BatchNorm2d(planes * 2, momentum=bn_mom),
+                                     BatchNorm2d(planes * 2, momentum=bn_mom),
                                      )
             self.spp = PAPPM(planes * 16, ppm_planes, planes * 4)
             self.dfm = Light_Bag(planes * 4, planes * 4)
@@ -106,7 +106,7 @@ class PIDNet(nn.Module):
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
-                # nn.BatchNorm2d(planes * block.expansion, momentum=bn_mom),
+                nn.BatchNorm2d(planes * block.expansion, momentum=bn_mom),
             )
 
         layers = []
@@ -126,7 +126,7 @@ class PIDNet(nn.Module):
             downsample = nn.Sequential(
                 nn.Conv2d(inplanes, planes * block.expansion,
                           kernel_size=1, stride=stride, bias=False),
-                # nn.BatchNorm2d(planes * block.expansion, momentum=bn_mom),
+                nn.BatchNorm2d(planes * block.expansion, momentum=bn_mom),
             )
 
         layer = block(inplanes, planes, stride, downsample, no_relu=True)
