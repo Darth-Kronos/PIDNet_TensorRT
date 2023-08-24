@@ -45,7 +45,7 @@ def parse_args():
     # parser.add_argument('--p', help='dir for pretrained model', default='./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt', type=str)
     parser.add_argument('--r', help='root or dir for input images', default='./samples/', type=str)
     parser.add_argument('--t', help='the format of input images (.jpg, .png, ...)', default='.png', type=str)     
-    parser.add_argument('--f', help='format of the model (native, torchscript, onnx)', default='native', type=str)     
+    parser.add_argument('--f', help='format of the model (pytorch, torchscript, onnx)', default='pytorch', type=str)     
 
 
     args = parser.parse_args()
@@ -78,8 +78,8 @@ if __name__ == '__main__':
     args = parse_args()
     images_list = glob.glob(args.r+'*'+args.t)
 
-    if args.f == "native":
-        print("Profiling Native model")
+    if args.f == "pytorch":
+        print("Profiling pytorch model")
         model = models.pidnet.get_pred_model(args.a, 19 if args.c else 11)
         model = load_pretrained(model, "./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt").cuda()
         model.eval()

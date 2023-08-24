@@ -28,7 +28,9 @@ For TensorRT (using the above ONNX model):
 trtexec --onnx=path/to/onnx/model --saveEngine=path/to/engine 
 ```
 ### 2. Inference
-
+```bash
+python tools/inference.py --f pytorch
+```
 ### 3. Speed Measurement
 * Measure the inference speed of PIDNet-S for Cityscapes:
 ````bash
