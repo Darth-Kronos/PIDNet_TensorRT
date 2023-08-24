@@ -1,35 +1,48 @@
 # PIDNet_TensorRT
 
-In this repository we use Torch-TensorRT to convert PIDNet-S and PIDNet-M models to TensorRT for faster inference.
+This repository provides a step-by-step guide and code for optimizing a state-of-the-art semantic segmentation model using TorchScript, ONNX, and TensorRT.
 
+## Prerequisites
+### Device: RTX 3050
+* CUDA: 12.0 (driver: 525) 
+* cuDNN: 8.9
+* TensorRT: 8.6
+
+### Device: NVIDIA Jetson Nano
+* Jetpack: 4.6.2
 ## Usage
 ### 0. Setup
-* Clone the official [PIDNet](https://github.com/XuJiacong/PIDNet/tree/main) repository and download the required model weights. We used the PyTorch NGC container [23.04-py3](https://catalog.ngc.nvidia.com/orgs/nvidia/containers/pytorch) and no additional dependencies were required!
+* Clone this repository and download the pretrained model from the  official [PIDNet](https://github.com/XuJiacong/PIDNet/tree/main) repository. 
 
-### 1. Export the models to TensorRT
+### 1. Export the model
+For TorchScript:
 ````bash
-python tools/export.py --a pidnet-s --p ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt --o ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_trt.ts
+python tools/export.py --a pidnet-s --p ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt --f torchscript
 ````
-### 2. Speed Measurement
+For ONNX:
+````bash
+python tools/export.py --a pidnet-s --p ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.pt --f onnx
+````
+For TensorRT (using the above ONNX model):
+```bash
+trtexec --onnx=path/to/onnx/model --saveEngine=path/to/engine 
+```
+### 2. Inference
+
+### 3. Speed Measurement
 * Measure the inference speed of PIDNet-S for Cityscapes:
 ````bash
-python models/speed/pidnet_speed.py --a 'pidnet-s' --c 19 --r 1024 2048
+python models/speed/pidnet_speed.py --f all
 ````
-* Measure the inference speed of PIDNet-S-trt for Cityscapes:
-````bash
-python models/speed/pidnet_speed.py --model ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_trt.ts
-````
-| Model (Cityscapes) | FPS | FPS (TensorRT)|
-|:-:|:-:|:-:|
-| PIDNet-S | 31.5 | 44.8 |
-| PIDNet-M | 11.7 | 14.9 |
+|             | FPS         | % increase |
+| :---------- | :---------: |:---------: |
+| PyTorch     | 24.72       | -          |
+| TorchScript | 27.09       | 9.59       |
+| ONNX        | 33.52       | 35.60      |
+| TensorRT    | 32.93       | 33.21      |
 
 speed test is performed on a single Nvidia GeForce RTX 3050 GPU
-### 4. Infer on Custom Videos
 
-````bash
-python tools/demo.py --model ./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_trt.ts --input ./path/to/sample/video
-````
 ### Acknowledgement
 1. [PIDNet](https://github.com/XuJiacong/PIDNet/tree/main)
 
