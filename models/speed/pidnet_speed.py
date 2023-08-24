@@ -271,7 +271,7 @@ def pytorch_speed():
 
 def torchscript_speed():
     iterations = None
-    model = torch.jit.load('./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test_traced.ts')
+    model = torch.jit.load('./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.ts')
     
     input = torch.randn(1, 3, args.r[0], args.r[1]).cuda()
     with torch.no_grad():
@@ -367,7 +367,7 @@ def trt_speed():
         with open(engine_file_path, "rb") as f, trt.Runtime(TRT_LOGGER) as runtime:
             return runtime.deserialize_cuda_engine(f.read())
     
-    engine_file = "/pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.engine"
+    engine_file = "./pretrained_models/cityscapes/PIDNet_S_Cityscapes_test.engine"
     img = torch.randn(1, 3, args.r[0], args.r[1])
     with load_engine(engine_file) as engine:
         with engine.create_execution_context() as context:
@@ -423,9 +423,9 @@ def trt_speed():
 
             t_start = time.time()
             for _ in range(iterations):
-                cuda.memcpy_htod_async(input_memory, input_buffer, stream)
+                # cuda.memcpy_htod_async(input_memory, input_buffer, stream)
                 context.execute_async_v2(bindings=bindings, stream_handle=stream.handle)
-                cuda.memcpy_dtoh_async(output_buffer, output_memory, stream)
+                # cuda.memcpy_dtoh_async(output_buffer, output_memory, stream)
             
             stream.synchronize()
             stream.synchronize()
@@ -450,6 +450,16 @@ if __name__ == '__main__':
         onnx_speed()
     elif args.f == "tensorrt":
         trt_speed()
+    elif args.f == "all":
+        print("Pytorch")
+        pytorch_speed()
+        print("torchscript")
+        torchscript_speed()
+        print("onnx")
+        onnx_speed()
+        print("Tensorrt")
+        trt_speed()
+
 
     
     
