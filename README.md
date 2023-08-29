@@ -7,9 +7,12 @@ This repository provides a step-by-step guide and code for optimizing a state-of
 * CUDA: 12.0 (driver: 525) 
 * cuDNN: 8.9
 * TensorRT: 8.6
-
+* PyCUDA
+  
 ### Device: NVIDIA Jetson Nano
 * Jetpack: 4.6.2
+* PyCUDA
+  
 ## Usage
 ### 0. Setup
 * Clone this repository and download the pretrained model from the  official [PIDNet](https://github.com/XuJiacong/PIDNet/tree/main) repository. 
