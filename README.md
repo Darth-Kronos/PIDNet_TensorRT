@@ -43,7 +43,7 @@ python models/speed/pidnet_speed.py --f all
 | :---------- | :---------: |:---------: |
 | PyTorch     | 24.72       | -          |
 | TorchScript | 27.09       | 9.59       |
-| ONNX        | 33.52       | 35.60      |
+| ONNX (with TensorRT EP)   | 33.52       | 35.60      |
 | TensorRT    | 32.93       | 33.21      |
 
 speed test is performed on a single Nvidia GeForce RTX 3050 GPU
